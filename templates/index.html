@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'navbar.html' %}
+    <div class="container">
+        <div class="row mt-5">
+            <div class="col-6">
+                {{ div_state_chart|safe }}
+            </div>
+            <div class="col-6">
+                {{ div_gender_chart|safe }}
+            </div>
+        </div>
+
+        {{ div_hist_age|safe }}
+
+    </div>
+
+    {{ script_gender_chart|safe }}
+    {{ script_state_chart|safe }}
+    {{ script_hist_age|safe }}
+{% endblock %}
