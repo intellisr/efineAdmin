@@ -1,4 +1,3 @@
-
 import math
 import numpy as np
 import pandas as pd
@@ -13,7 +12,9 @@ from bokeh.transform import factor_cmap
 from bokeh.models import GMapOptions
 from bokeh.plotting import gmap
 
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, url_for, redirect, session
+import pymongo
+import text
 
 df = pd.read_csv('data/tv.csv')
 
@@ -92,8 +93,91 @@ def redraw(selected_class):
 ##FLASK FRAMEWORK
 
 app = Flask(__name__)
+app.secret_key = "testing"
+client = pymongo.MongoClient("mongodb+srv://efine:efine123@cluster0.ayw3o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
+db = client.test
+db = client.get_database('EfineDB')
+adminRec = db.Admin
+policeRec = db.Police
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route("/")
+def main():
+    return render_template('Loginadmin.html')
+
+
+@app.route("/nlp")
+def nlp():
+    records=text.getTenMostViolations()
+    return render_template('NLP.html',result=records)
+
+@app.route("/analyse",methods = ['POST', 'GET'])
+def analyse():
+    text.getKnowledge()
+    records=text.getTenMostViolations()
+    return render_template('NLP.html',result=records)
+  
+
+@app.route("/logout")
+def logout():
+    return redirect(url_for('main'))
+
+@app.route("/regAdminView")
+def regAdminView():
+    return render_template('AdminReg.html')
+
+
+@app.route("/regPoliceView")
+def regPoliceView():
+    return render_template('PoliceReg.html')    
+
+
+@app.route("/regAdmin",methods = ['POST', 'GET'])
+def regAdmin():
+
+    if request.method == 'POST':
+       username = request.form['id']
+       pw = request.form['pwd']
+
+    user_input = {'idNo': username, 'password': pw}
+    adminRec.insert_one(user_input)   
+
+    return redirect(url_for('regAdminView'))
+
+@app.route("/regPolice",methods = ['POST', 'GET'])
+def regPolice():
+
+    if request.method == 'POST':
+       email = request.form['email']
+       idNo = request.form['id']
+       name = request.form['name']
+       rankNo = request.form['rank']
+
+    user_input = {'Email': email, 'idNo': idNo,'Name':name,'rankNo':rankNo}
+    policeRec.insert_one(user_input)   
+
+    return redirect(url_for('regPoliceView'))              
+
+
+@app.route('/loginadmin',methods = ['POST', 'GET'])
+def loginadmin():
+    
+   if request.method == 'POST':
+      username = request.form['id']
+      pw = request.form['pwd']
+
+   dataRec = adminRec.find_one({"idNo": username})
+   print(dataRec)   
+   if dataRec == None:
+       return redirect(url_for('main'))
+
+   else:    
+       password = dataRec['password']
+       if password == pw:    
+            return redirect(url_for('chart'))
+       else:
+            return redirect(url_for('main'))
+             
+@app.route('/chart', methods=['GET', 'POST'])
 def chart():
 
     selected_class = request.form.get('dropdown-select')
@@ -152,6 +236,42 @@ def gender_bar_chart(dataset, title, cpalette=None):
     
     return p
 
+##Property CHART GENERATION FUNCTIONS
+
+def Property_bar_chart(dataset, title, cpalette=None):
+
+    if cpalette is None:
+        cpalette = palette[1:3]
+
+    Property_data = dataset
+    Property_wise = list(Property_data['Gender'].value_counts().index)
+    Property_values = list(Property_data['Gender'].value_counts().values)
+    Property_wise_text = ['Male', 'Female']
+        
+    source = ColumnDataSource(data={
+        'Property': Property_wise,
+        'Property_txt': Property_wise_text,
+        'values': Property_values
+    })
+
+    hover_tool = HoverTool(
+        tooltips=[('Property?', '@Property_values_txt'),
+                  ('Count', '@values')]
+    )
+    
+    p = figure(tools=[hover_tool], plot_height=400, title=title)
+    p.vbar(x='Property', top='values', source=source, width=0.9,
+           fill_color=factor_cmap('Property_txt',
+                                  palette=palette_generator(len(source.data['Property_txt']), cpalette),
+                                  factors=source.data['Property_txt']))
+    
+    plot_styler(p)
+    p.xaxis.ticker = source.data['Property']
+    p.xaxis.major_label_overrides = { 0: 'Male', 1: 'Female' }
+    p.sizing_mode = 'scale_width'
+    
+    return p    
+
 
 def state_bar_chart(dataset, title, cpalette=None):
     if cpalette is None:
@@ -191,7 +311,6 @@ def state_bar_chart(dataset, title, cpalette=None):
 
 def map_chart_loc(dataset, title, color=palette[1]):
 
-    #dataset = df[df['State'] == "VA"]
     map_options = GMapOptions(lat=39.16288833, lng=-77.22908833, map_type="roadmap", zoom=12)
 
     p = gmap("AIzaSyAK0D5nFLLwrpgTmU-nzGPlQU26vy_v7NI", map_options, title="Vialations Clusturing by Location")

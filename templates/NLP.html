@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'navbar2.html' %}
+    <body style="background-image:url({{ url_for('static', filename = 'my.jpg') }});background-size:cover;">
+        <form action ="http://localhost:5000/analyse" method = "post">    
+    <div class="container">  
+                <div class="bdiv2">
+                    <div class="insidediv2" style="text-align: left;">
+                        <img class="bimg" src="{{ url_for('static', filename = 'admin.png') }}"/>
+                        <h3>10 Most Reasons for Traffic Violations</h3>
+                        <div style="float: left;">
+                        <ol>
+                        {% for value in result %}
+                            <li>{{ value[0] }}</li>
+                        {% endfor %}
+                        </ol>
+                        </div>
+                        <div class="buttondiv" style="text-align: center;">
+                            <button class="button2" type="submit">Analyse</button></div>
+                </div>       
+            </div>
+    </div>
+        </form>
+    </body>
+{% endblock %}

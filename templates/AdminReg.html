@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'navbar2.html' %}
+    <body style="background-image:url({{ url_for('static', filename = 'my.jpg') }});background-size:cover;">
+    <div class="container">
+        <form action ="http://localhost:5000/regAdmin" method = "post">    
+            <div id="includedContent"></div>
+                <div class="bdiv">
+                    <div class="insidediv">
+                        <img class="bimg" src="{{ url_for('static', filename = 'admin.png') }}"/>
+                        <h3>Register Admin</h3>
+                        <div class="cdiv">
+                            <img class="textimg" src="{{ url_for('static', filename = 'un5.png')}}"/>
+                            <input type="text" placeholder="ID No" name="id"> </br></div>
+                            
+                        <div class="cdiv">
+                            <img class="textimg" src="{{ url_for('static', filename = 'pw.png')}}"/>
+                            <input type="text" placeholder="Password" name="pwd">
+                        </div>                      
+                        <div class="buttondiv">
+                            <button class="button2" type="submit">Register</button></div>
+                            
+                </div>
+           </form>
+    </div>
+    </body>
+{% endblock %}
