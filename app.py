@@ -163,7 +163,7 @@ def regPolice():
     policeRec.insert_one(user_input)   
     result = "Successfully Added"
     all = policeRec.find()
-    return redirect('PoliceReg.html',result=result,data=list(all))              
+    return render_template('PoliceReg.html',result=result,data=list(all))              
 
 @app.route('/loginadmin',methods = ['POST', 'GET'])
 def loginadmin():
