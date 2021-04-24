@@ -2,6 +2,7 @@ import math
 import numpy as np
 import pandas as pd
 import os
+from datetime import datetime 
 
 from bokeh.embed import components
 from bokeh.layouts import column, gridplot, layout, row
@@ -19,9 +20,7 @@ import text
 df = pd.read_csv('data/tv.csv')
 
 ##Constants
-
 palette = ['#ba32a0', '#f85479', '#f8c260', '#00c2ba']
-
 chart_font = 'Helvetica'
 chart_title_font_size = '16pt'
 chart_title_alignment = 'center'
@@ -32,7 +31,6 @@ chart_inner_left_padding = 0.015
 chart_font_style_title = 'bold italic'
 
 ##HELPER FUNCTIONS
-
 def palette_generator(length, palette):
     int_div = length // len(palette)
     remainder = length % len(palette)
@@ -61,7 +59,6 @@ def plot_styler(p):
 
 
 def redraw(selected_class):
-
     selected_class = int(selected_class)
     if selected_class == 0: # all classes
         dataset = df
@@ -91,7 +88,6 @@ def redraw(selected_class):
     )
 
 ##FLASK FRAMEWORK
-
 app = Flask(__name__)
 app.secret_key = "testing"
 client = pymongo.MongoClient("mongodb+srv://efine:efine123@cluster0.ayw3o.mongodb.net/myFirstDatabase?retryWrites=true&w=majority")
@@ -116,20 +112,30 @@ def analyse():
     records=text.getTenMostViolations()
     return render_template('NLP.html',result=records)
   
-
 @app.route("/logout")
 def logout():
     return redirect(url_for('main'))
 
 @app.route("/regAdminView")
 def regAdminView():
-    return render_template('AdminReg.html')
-
+    all = adminRec.find()
+    return render_template('AdminReg.html',data=list(all))
 
 @app.route("/regPoliceView")
 def regPoliceView():
-    return render_template('PoliceReg.html')    
+    all = policeRec.find()
+    return render_template('PoliceReg.html',data=list(all))
 
+@app.route("/reportView")
+def reportView():
+    all = db.Report.find()
+    return render_template('report.html',data=list(all))
+
+@app.route("/exportReport",methods = ['POST', 'GET'])
+def exportReport():
+    mongo_export_to_file()
+    all = db.Report.find()
+    return render_template('report.html',data=list(all))                
 
 @app.route("/regAdmin",methods = ['POST', 'GET'])
 def regAdmin():
@@ -140,8 +146,9 @@ def regAdmin():
 
     user_input = {'idNo': username, 'password': pw}
     adminRec.insert_one(user_input)   
-
-    return redirect(url_for('regAdminView'))
+    result = "Successfully Added"
+    all = adminRec.find()
+    return render_template('AdminReg.html',result=result,data=list(all))
 
 @app.route("/regPolice",methods = ['POST', 'GET'])
 def regPolice():
@@ -154,9 +161,9 @@ def regPolice():
 
     user_input = {'Email': email, 'idNo': idNo,'Name':name,'rankNo':rankNo}
     policeRec.insert_one(user_input)   
-
-    return redirect(url_for('regPoliceView'))              
-
+    result = "Successfully Added"
+    all = policeRec.find()
+    return redirect('PoliceReg.html',result=result,data=list(all))              
 
 @app.route('/loginadmin',methods = ['POST', 'GET'])
 def loginadmin():
@@ -168,14 +175,16 @@ def loginadmin():
    dataRec = adminRec.find_one({"idNo": username})
    print(dataRec)   
    if dataRec == None:
-       return redirect(url_for('main'))
+       result="Wrong userId or password"
+       return render_template('Loginadmin.html',result=result)
 
    else:    
        password = dataRec['password']
-       if password == pw:    
+       if password == pw: 
             return redirect(url_for('chart'))
        else:
-            return redirect(url_for('main'))
+            result="Wrong userId or password"
+            return render_template('Loginadmin.html',result=result)
              
 @app.route('/chart', methods=['GET', 'POST'])
 def chart():
@@ -237,7 +246,6 @@ def gender_bar_chart(dataset, title, cpalette=None):
     return p
 
 ##Property CHART GENERATION FUNCTIONS
-
 def Property_bar_chart(dataset, title, cpalette=None):
 
     if cpalette is None:
@@ -271,7 +279,6 @@ def Property_bar_chart(dataset, title, cpalette=None):
     p.sizing_mode = 'scale_width'
     
     return p    
-
 
 def state_bar_chart(dataset, title, cpalette=None):
     if cpalette is None:
@@ -308,7 +315,6 @@ def state_bar_chart(dataset, title, cpalette=None):
     
     return p
 
-
 def map_chart_loc(dataset, title, color=palette[1]):
 
     map_options = GMapOptions(lat=39.16288833, lng=-77.22908833, map_type="roadmap", zoom=12)
@@ -322,6 +328,18 @@ def map_chart_loc(dataset, title, color=palette[1]):
     p.plot_width=1200
 
     return p
+
+def mongo_export_to_file():
+    today = datetime.today()
+    today = today.strftime("%m-%d-%Y")
+
+    mongo_docs = db.Police.find()
+    # Convert the mongo docs to a DataFrame
+    docs = pd.DataFrame(mongo_docs)
+    # Discard the Mongo ID for the documents
+    docs.pop("_id")
+    # export MongoDB documents to a CSV file, leaving out the row "labels" (row numbers)
+    docs.to_csv('Outstanding_Fine_Report-' + today +'.csv', ",", index=False) # CSV delimited by commas    
 
 if __name__ == '__main__':
     app.run(debug=True)

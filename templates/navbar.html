@@ -1,5 +1,5 @@
 <nav class="navbar navbar-expand-lg sticky-top navbar-dark" style="background-color: #1869ac;">
-    <a class="navbar-brand title-text" href="#">E-Fine :Dashboard</a>
+    <img style="height: 60px;width: 150px;" src="{{ url_for('static', filename = '2.png') }}"/>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarText" aria-controls="navbarText" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -7,6 +7,9 @@
         <ul class="navbar-nav mr-auto lef">   
         </ul>        
         <ul class="navbar-nav">
+            <li class="nav-item">
+                <a class="nav-link" style="padding:8px;border-radius:8px;" href="{{url_for('reportView')}}"> Violation Report</a>
+            </li>
             <li class="nav-item">
                 <a class="nav-link" style="padding:8px;border-radius:8px;" href="{{url_for('nlp')}}"> NLP</a>
             </li>
@@ -24,18 +27,5 @@
     </div>
 </nav>
 <div style="margin-top: 30px;margin-left: 30px;">
-<form name="dropdown-form" action="" method="POST">
-    <label>
-        <select class="my-dropdown-menu" name="dropdown-select" style="padding:8px;border-radius:8px;" onchange="this.form.submit()">
-            <option value="0" {% if selected_class=='0' %} selected {% endif %}>All Years</option>
-            <option value="1" {% if selected_class=='1' %} selected {% endif %}>2012</option>
-            <option value="2" {% if selected_class=='2' %} selected {% endif %}>2013</option>
-            <option value="3" {% if selected_class=='3' %} selected {% endif %}>2014</option>
-            <option value="4" {% if selected_class=='4' %} selected {% endif %}>2015</option>
-            <option value="5" {% if selected_class=='5' %} selected {% endif %}>2016</option>
-            <option value="6" {% if selected_class=='6' %} selected {% endif %}>2017</option>
-        </select>
-    </label>
-    <!-- button class="submit-btn" type="submit">Apply</button -->
-</form>
+
 </div>

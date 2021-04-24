@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block content %}
+    {% include 'navbar2.html' %}
+    <body style="background-image:url({{ url_for('static', filename = 'my.jpg') }});background-size:cover;">
+    <div class="container">    
+            <div id="includedContent"></div>
+                <div class="bdiv2">
+                    <div class="insidediv2">                        
+                    </form>
+                    <h1 class="title pb-20 pr-30" style="color:red;">List of Reported Violations</h1>
+                    <table class="table table-hover">
+                        <thead class="info">
+                        <tr>
+                            <th>Type</th>
+                            <th>Licence</th>
+                            <th>Police</th>
+                            <th>Date</th>
+                            <th>Paid</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for value in data %}
+                        <tr>
+                            <td>{{ value['type']}}</td>
+                            <td>{{ value['licence'] }}</td>
+                            <td>{{ value['police'] }}</td>
+                            <td>{{ value['date'] }}</td>
+                            <td>{{ value['paid'] }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <form action ="http://localhost:5000/exportReport" method = "post">    
+                    <div class="buttondiv">
+                        <button class="button2" type="submit">Export</button>
+                    </div>
+                    </form>   
+                </div>
+    </div>
+    </body>
+{% endblock %}
+
+<script>
+    $(".alert").delay(3200).fadeOut(300);
+</script> 

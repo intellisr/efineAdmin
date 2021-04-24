@@ -2,7 +2,8 @@
 <html>
     <head>
     <link rel="stylesheet" href="{{ url_for('static', filename = 'css/home.css') }}">
-    <script src="{{ url_for('static', filename = 'js/jquery-1.11.2.min.js') }}"></script>  
+    <script src="{{ url_for('static', filename = 'js/jquery-1.11.2.min.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">  
     </head>
 
   <body style="background-image:url({{ url_for('static', filename = 'my.jpg') }});background-size:cover;">
@@ -11,6 +12,7 @@
         <div class="bdiv">
             <div class="insidediv">
                 <img class="bimg" src="{{ url_for('static', filename = 'admin.png') }}"/>
+                <h2>ADMIN LOGIN</h2>
                 <div class="cdiv">
                     <img class="textimg" src="{{ url_for('static', filename = 'un5.png')}}"/>
                     <input type="text" placeholder="ID No" name="id"> </br></div>
@@ -29,6 +31,7 @@
    </form>
    </body>
 </html>
+
 
 
 
