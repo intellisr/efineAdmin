@@ -9,7 +9,7 @@
                 font-size: 30px;
             }
             .a{
-                color: white;
+                color: rgb(24, 2, 2);
                 float: right;
                 font-size: 20px;
                 margin-top: 30px;
@@ -103,6 +103,11 @@
             .textspace{
                 padding-top: 10px;
                 padding-bottom: 10px;
+            }
+
+            .navbar-dark .navbar-nav .nav-link {
+                color: rgba(36, 1, 1, 0.5);
+                font-weight: bold;
             }
             
          

@@ -13,11 +13,13 @@ from bokeh.transform import factor_cmap
 from bokeh.models import GMapOptions
 from bokeh.plotting import gmap
 
-from flask import Flask, render_template, request, url_for, redirect, session
+from flask import Flask, render_template, request, url_for, redirect, session ,Response
 import pymongo
 import text
+from flask.helpers import send_file, send_from_directory
 
 df = pd.read_csv('data/tv.csv')
+#pw=efine1234
 
 ##Constants
 palette = ['#ba32a0', '#f85479', '#f8c260', '#00c2ba']
@@ -135,7 +137,15 @@ def reportView():
 def exportReport():
     mongo_export_to_file()
     all = db.Report.find()
-    return render_template('report.html',data=list(all))                
+    today = datetime.today()
+    today = today.strftime("%m-%d-%Y")
+
+    mongo_docs = db.Police.find()
+    docs = pd.DataFrame(mongo_docs)
+    docs.pop("_id")
+    docs.to_csv('Outstanding_Fine_Report-' + today +'.csv', ",", index=False)
+    path='Outstanding_Fine_Report-' + today +'.csv' 
+    return send_file(path, as_attachment=True)             
 
 @app.route("/regAdmin",methods = ['POST', 'GET'])
 def regAdmin():
@@ -144,9 +154,15 @@ def regAdmin():
        username = request.form['id']
        pw = request.form['pwd']
 
-    user_input = {'idNo': username, 'password': pw}
-    adminRec.insert_one(user_input)   
-    result = "Successfully Added"
+    dataRec = adminRec.find_one({"idNo": username})
+    print(dataRec)   
+    if dataRec == None:
+        user_input = {'idNo': username, 'password': pw}
+        adminRec.insert_one(user_input)   
+        result = "Successfully Added"        
+    else:
+        result="user alredy exist" 
+
     all = adminRec.find()
     return render_template('AdminReg.html',result=result,data=list(all))
 
@@ -159,9 +175,14 @@ def regPolice():
        name = request.form['name']
        rankNo = request.form['rank']
 
-    user_input = {'Email': email, 'idNo': idNo,'Name':name,'rankNo':rankNo}
-    policeRec.insert_one(user_input)   
-    result = "Successfully Added"
+    dataRec = policeRec.find_one({"Email": email})
+    print(dataRec)   
+    if dataRec == None:
+        user_input = {'Email': email, 'idNo': idNo,'Name':name,'rankNo':rankNo}
+        policeRec.insert_one(user_input)   
+        result = "Successfully Added"
+    else:    
+        result="user alredy exist"
     all = policeRec.find()
     return render_template('PoliceReg.html',result=result,data=list(all))              
 
